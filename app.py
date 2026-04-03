@@ -25,11 +25,23 @@ def load_assets():
     global model, X_all, y_all, y_pred_all, mae, mse, r2
     try:
         if model is None:
-            model = joblib.load(model_path)
-            X_all, y_all, y_pred_all, mae, mse, r2 = joblib.load(test_data_path)
+            # Gunakan jalur absolut agar Vercel tidak bingung
+            bundle_path = os.path.join(BASE_DIR, 'bundle_model.pkl')
+            
+            if os.path.exists(bundle_path):
+                # Jika pakai cara bundle (rekomendasi)
+                data = joblib.load(bundle_path)
+                model = data['model']
+                X_all, y_all, y_pred_all, mae, mse, r2 = data['stats']
+                print("Berhasil memuat dari bundle_model.pkl")
+            else:
+                # Jika file bundle tidak ada, coba muat satuan (cadangan)
+                model = joblib.load(model_path)
+                X_all, y_all, y_pred_all, mae, mse, r2 = joblib.load(test_data_path)
+                print("Berhasil memuat dari file pkl satuan")
         return True
     except Exception as e:
-        print(f"Error loading model: {e}")
+        print(f"Gagal total memuat aset: {e}")
         return False
 
 def plot_comparison():
